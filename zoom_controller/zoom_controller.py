@@ -6,7 +6,6 @@ Run this first to make sure everything works
 import subprocess
 import time
 
-
 class ZoomController:
     """Control macOS screen zoom via accessibility features"""
     
