@@ -11,11 +11,11 @@ from pathlib import Path
 dotenv_path = Path(__file__).parent / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
-ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
+ELEVEN_API_KEY = os.getenv("ELEVEN_KEY")
 VOICE_ID = os.getenv("ELEVEN_VOICE_ID")
 
 if not ELEVEN_API_KEY or not VOICE_ID:
-    raise ValueError("⚠️ ELEVEN_API_KEY or ELEVEN_VOICE_ID is missing in .env")
+    raise ValueError("⚠️ ELEVEN_KEY or ELEVEN_VOICE_ID is missing in .env")
 
 ELEVEN_API_URL = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
 
