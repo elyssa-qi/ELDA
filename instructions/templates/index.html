@@ -129,6 +129,38 @@
             cursor: not-allowed;
         }
 
+        #voiceButton {
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            min-width: 48px;
+        }
+
+        #voiceButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        #voiceButton:active {
+            transform: translateY(0);
+        }
+
+        #voiceButton.listening {
+            background: linear-gradient(135deg, #e94560 0%, #f27121 100%);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
         .loading {
             display: none;
             text-align: center;
@@ -152,6 +184,199 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .close-button:hover {
+            background: #f0f0f0;
+        }
+
+        .progress-section {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .steps-container {
+            padding: 20px;
+        }
+
+        .step-item {
+            background: #f8f9ff;
+            border: 1px solid #e0e6ff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .step-item.completed {
+            background: #f0f8f0;
+            border-color: #d0e8d0;
+        }
+
+        .step-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .step-description {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .step-actions {
+            margin-top: 12px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .cant-complete-btn {
+            background: #ffe6e6;
+            color: #d63384;
+            border: 1px solid #f5c6cb;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cant-complete-btn:hover {
+            background: #f5c6cb;
+        }
+
+        .help-section {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .help-button {
+            width: 100%;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .help-button:hover {
+            background: #0056b3;
+        }
+
+        .help-icon {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #007bff;
         }
     </style>
 </head>
@@ -178,11 +403,41 @@
                 placeholder="Type your question here..."
                 onkeypress="handleKeyPress(event)"
             >
+            <button id="voiceButton" onclick="toggleVoiceInput()" title="Voice Input">🎤</button>
             <label class="checkbox-container">
                 <input type="checkbox" id="speakToggle">
                 <span>🔊 Speak</span>
             </label>
             <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <!-- Step-by-step Modal -->
+    <div class="modal-overlay" id="stepModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">How to [Task]</h2>
+                <button class="close-button" onclick="closeStepModal()">×</button>
+            </div>
+            
+            <div class="progress-section">
+                <div class="progress-label">Progress</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div id="progressText" style="font-size: 12px; color: #666; margin-top: 4px;">0/0</div>
+            </div>
+            
+            <div class="steps-container" id="stepsContainer">
+                <!-- Steps will be dynamically added here -->
+            </div>
+            
+            <div class="help-section">
+                <button class="help-button" onclick="requestGeneralHelp()">
+                    <div class="help-icon">?</div>
+                    Need General Help? Call AI Agent
+                </button>
+            </div>
         </div>
     </div>
 
@@ -219,23 +474,48 @@
             loading.classList.add('active');
 
             try {
-                const response = await fetch('/ask', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        question: question,
-                        speak: speakToggle.checked
-                    })
-                });
+                // Check if this is a step-by-step request
+                if (isStepByStepRequest(question)) {
+                    const response = await fetch('/generate-steps', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            task: question,
+                            speak: speakToggle.checked
+                        })
+                    });
 
-                const data = await response.json();
+                    const data = await response.json();
 
-                if (response.ok) {
-                    addMessage(data.answer, false);
+                    if (response.ok) {
+                        // Show the step-by-step modal
+                        showStepModal(data.task, data.steps);
+                        addMessage(`I've created a step-by-step guide for "${data.task}". Check out the modal!`, false);
+                    } else {
+                        addMessage(`Error: ${data.error}`, false);
+                    }
                 } else {
-                    addMessage(`Error: ${data.error}`, false);
+                    // Regular chat response
+                    const response = await fetch('/ask', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            question: question,
+                            speak: speakToggle.checked
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        addMessage(data.answer, false);
+                    } else {
+                        addMessage(`Error: ${data.error}`, false);
+                    }
                 }
             } catch (error) {
                 addMessage(`Error: ${error.message}`, false);
@@ -252,6 +532,185 @@
 
         // Focus input on load
         userInput.focus();
+
+        // Step-by-step modal functionality
+        let currentSteps = [];
+        let completedSteps = 0;
+
+        function showStepModal(task, steps) {
+            currentSteps = steps;
+            completedSteps = 0;
+            
+            document.getElementById('modalTitle').textContent = `How to ${task}`;
+            document.getElementById('stepsContainer').innerHTML = '';
+            
+            steps.forEach((step, index) => {
+                const stepElement = createStepElement(step, index);
+                document.getElementById('stepsContainer').appendChild(stepElement);
+            });
+            
+            updateProgress();
+            document.getElementById('stepModal').classList.add('active');
+        }
+
+        function createStepElement(step, index) {
+            const stepDiv = document.createElement('div');
+            stepDiv.className = 'step-item';
+            stepDiv.id = `step-${index}`;
+            
+            stepDiv.innerHTML = `
+                <input type="checkbox" class="step-checkbox" onchange="toggleStep(${index})" id="checkbox-${index}">
+                <div class="step-content">
+                    <div class="step-title">Step ${index + 1}:</div>
+                    <div class="step-description">${step}</div>
+                    <div class="step-actions">
+                        <button class="cant-complete-btn" onclick="cantCompleteStep(${index})">
+                            Can't Complete This Step
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return stepDiv;
+        }
+
+        function toggleStep(index) {
+            const checkbox = document.getElementById(`checkbox-${index}`);
+            const stepDiv = document.getElementById(`step-${index}`);
+            
+            if (checkbox.checked) {
+                stepDiv.classList.add('completed');
+                completedSteps++;
+            } else {
+                stepDiv.classList.remove('completed');
+                completedSteps--;
+            }
+            
+            updateProgress();
+        }
+
+        function cantCompleteStep(index) {
+            // For now, just mark as completed and show a message
+            const checkbox = document.getElementById(`checkbox-${index}`);
+            const stepDiv = document.getElementById(`step-${index}`);
+            
+            checkbox.checked = true;
+            stepDiv.classList.add('completed');
+            completedSteps++;
+            updateProgress();
+            
+            // Show a message that they can ask for help
+            addMessage(`Step ${index + 1} marked as completed. You can ask for help with this step anytime!`, false);
+        }
+
+        function updateProgress() {
+            const totalSteps = currentSteps.length;
+            const progressPercentage = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
+            
+            document.getElementById('progressFill').style.width = `${progressPercentage}%`;
+            document.getElementById('progressText').textContent = `${completedSteps}/${totalSteps}`;
+            
+            if (completedSteps === totalSteps && totalSteps > 0) {
+                // All steps completed
+                setTimeout(() => {
+                    addMessage('🎉 Congratulations! You\'ve completed all steps!', false);
+                    closeStepModal();
+                }, 1000);
+            }
+        }
+
+        function closeStepModal() {
+            document.getElementById('stepModal').classList.remove('active');
+            currentSteps = [];
+            completedSteps = 0;
+        }
+
+        function requestGeneralHelp() {
+            closeStepModal();
+            userInput.focus();
+            addMessage('I\'m here to help! What specific step are you having trouble with?', false);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('stepModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeStepModal();
+            }
+        });
+
+        // Detect if user is asking for step-by-step instructions
+        function isStepByStepRequest(message) {
+            const stepKeywords = [
+                'how to', 'how do i', 'steps to', 'step by step', 'guide me', 
+                'walk me through', 'show me how', 'tutorial', 'instructions'
+            ];
+            return stepKeywords.some(keyword => 
+                message.toLowerCase().includes(keyword)
+            );
+        }
+
+        // Voice input functionality
+        let isListening = false;
+        let recognition = null;
+
+        // Initialize speech recognition
+        function initSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                console.warn('Speech recognition not supported');
+                return false;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = function() {
+                isListening = true;
+                document.getElementById('voiceButton').classList.add('listening');
+                document.getElementById('voiceButton').textContent = '🔴';
+                addMessage('Listening...', false);
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                userInput.value = transcript;
+                addMessage(`Voice input: "${transcript}"`, false);
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                addMessage(`Voice input error: ${event.error}`, false);
+            };
+
+            recognition.onend = function() {
+                isListening = false;
+                document.getElementById('voiceButton').classList.remove('listening');
+                document.getElementById('voiceButton').textContent = '🎤';
+            };
+
+            return true;
+        }
+
+        function toggleVoiceInput() {
+            if (!recognition && !initSpeechRecognition()) {
+                addMessage('Voice input is not supported in your browser.', false);
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+
+        // Initialize speech recognition on page load
+        window.addEventListener('load', function() {
+            initSpeechRecognition();
+        });
     </script>
 </body>
 </html>

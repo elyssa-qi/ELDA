@@ -1,9 +1,6 @@
-# app.py
+# app_test.py - Test version without API dependencies
 from flask import Flask, render_template, request, jsonify
-from gemini_client import ask_gemini, generate_steps
-from voice_output import speak
 import threading
-import re
 
 app = Flask(__name__)
 
@@ -21,12 +18,8 @@ def ask():
     if not question:
         return jsonify({'error': 'No question provided'}), 400
 
-    # Get response from Gemini
-    answer = ask_gemini(question)
-
-    # Optionally speak the response (in background to not block)
-    if data.get('speak', False):
-        threading.Thread(target=speak, args=(answer,), daemon=True).start()
+    # Mock response for testing
+    answer = f"Test response: I received your question '{question}'. This is a mock response for testing the UI."
 
     return jsonify({
         'question': question,
@@ -42,18 +35,23 @@ def generate_steps_endpoint():
     if not task:
         return jsonify({'error': 'No task provided'}), 400
 
-    try:
-        # Generate steps using Gemini
-        steps_data = generate_steps(task)
-        
-        # Optionally speak the response (in background to not block)
-        if data.get('speak', False):
-            threading.Thread(target=speak, args=(f"I've created a step-by-step guide for {steps_data['task']}",), daemon=True).start()
-
-        return jsonify(steps_data)
+    # Mock steps for testing
+    mock_steps = [
+        "Open your web browser",
+        "Navigate to the appropriate website",
+        "Locate the search function",
+        "Enter your search query",
+        "Review the results",
+        "Take action based on findings"
+    ]
     
-    except Exception as e:
-        return jsonify({'error': f'Failed to generate steps: {str(e)}'}), 500
+    steps_data = {
+        "task": task.replace("how to", "").replace("how do i", "").strip(),
+        "steps": mock_steps
+    }
+
+    return jsonify(steps_data)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+
