@@ -1,0 +1,19 @@
+{
+    "name": "elda-tutorial-popup",
+    "version": "1.0.0",
+    "description": "Interactive tutorial popup that appears over any screen",
+    "main": "main.js",
+    "scripts": {
+      "start": "electron .",
+      "dev": "electron . --dev"
+    },
+    "keywords": ["electron", "tutorial", "popup"],
+    "author": "Your Name",
+    "license": "MIT",
+    "devDependencies": {
+      "electron": "^27.0.0"
+    },
+    "dependencies": {
+      "ws": "^8.14.2"
+    }
+  }
