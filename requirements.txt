@@ -5,3 +5,6 @@ wavio
 google-genai
 pvporcupine
 increasevolume
+pillow
+flask
+flask-cors
