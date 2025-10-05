@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import TutorialCard from './components/TutorialCard';
+import EldaState from './components/EldaState';
 import './styles.css';
 
 // Helper functions to manage saved progress
@@ -19,6 +20,10 @@ function clearTutorialProgress() {
 
 function App() {
   const cardRef = useRef(null);
+
+  // State for Elda states: 'listening', 'thinking', 'tutorial'
+  const [eldaState, setEldaState] = useState('listening');
+  const [currentTranscription, setCurrentTranscription] = useState('');
 
   // State for tutorial data
   const [tutorial, setTutorial] = useState(null);
@@ -51,7 +56,17 @@ function App() {
     if (window.electronAPI?.onTutorialRequest) {
       window.electronAPI.onTutorialRequest((data) => {
         console.log('Received tutorial request:', data);
+        setCurrentTranscription(data.transcription);
+        setEldaState('thinking');
         fetchTutorial(data.transcription);
+      });
+    }
+
+    // Listen for state changes from Electron
+    if (window.electronAPI?.onSetState) {
+      window.electronAPI.onSetState((data) => {
+        console.log('Received state change:', data);
+        setEldaState(data.state);
       });
     }
   }, []);
@@ -80,13 +95,17 @@ function App() {
         setCompletedSteps([]);
         setShowDetailedHelp(false);
         clearTutorialProgress();
+        // Switch to tutorial state after fetching
+        setEldaState('tutorial');
       } else {
         setError('Failed to generate tutorial');
         console.error('Error from backend:', result.error);
+        setEldaState('listening'); // Go back to listening on error
       }
     } catch (err) {
       console.error('Error fetching tutorial:', err);
       setError('Could not connect to tutorial service');
+      setEldaState('listening'); // Go back to listening on error
     } finally {
       setLoading(false);
     }
@@ -149,49 +168,59 @@ function App() {
   };
 
   const handleClose = () => {
+    setEldaState('listening');
     if (window.electronAPI?.closePopup) {
       window.electronAPI.closePopup();
     }
   };
 
-  // Loading state
-  if (loading) {
+  // Show different states based on eldaState
+  if (eldaState === 'listening') {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Generating your tutorial...</p>
-      </div>
+      <EldaState 
+        state="listening" 
+        transcription="" 
+      />
     );
   }
 
-  // Error state (but still show UI)
-  if (error) {
-    console.error('Tutorial error:', error);
+  if (eldaState === 'thinking') {
+    return (
+      <EldaState 
+        state="thinking" 
+        transcription={currentTranscription} 
+      />
+    );
   }
 
-  // No tutorial loaded yet
-  if (!tutorial) {
-    return <div className="loading">Loading...</div>;
+  if (eldaState === 'tutorial' && tutorial) {
+    const currentStepData = tutorial.steps[currentStep];
+    const progress = ((currentStepData.step) / currentStepData.totalSteps) * 100;
+
+    return (
+      <TutorialCard
+        title={tutorial.title}
+        stepTitle={currentStepData.title}
+        stepDescription={currentStepData.description}
+        detailedHelp={currentStepData.detailedHelp}
+        showDetailedHelp={showDetailedHelp}
+        stepIndicator={`Step ${currentStepData.step} of ${currentStepData.totalSteps}`}
+        progress={progress}
+        isLastStep={currentStep === tutorial.steps.length - 1}
+        onNextStep={handleNextStep}
+        onNeedHelp={handleNeedHelp}
+        onClose={handleClose}
+        completedSteps={completedSteps}
+        currentStepIndex={currentStep}
+      />
+    );
   }
 
-  const currentStepData = tutorial.steps[currentStep];
-  const progress = ((currentStepData.step) / currentStepData.totalSteps) * 100;
-
+  // Fallback to listening state
   return (
-    <TutorialCard
-      title={tutorial.title}
-      stepTitle={currentStepData.title}
-      stepDescription={currentStepData.description}
-      detailedHelp={currentStepData.detailedHelp}
-      showDetailedHelp={showDetailedHelp}
-      stepIndicator={`Step ${currentStepData.step} of ${currentStepData.totalSteps}`}
-      progress={progress}
-      isLastStep={currentStep === tutorial.steps.length - 1}
-      onNextStep={handleNextStep}
-      onNeedHelp={handleNeedHelp}
-      onClose={handleClose}
-      completedSteps={completedSteps}
-      currentStepIndex={currentStep}
+    <EldaState 
+      state="listening" 
+      transcription="" 
     />
   );
 }
