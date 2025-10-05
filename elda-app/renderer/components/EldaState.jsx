@@ -35,7 +35,7 @@ function EldaState({ state, transcription }) {
   };
 
   return (
-    <div className="elda-state-container">
+    <div className={`elda-state-container ${state}`}>
       <div className="elda-image-container">
         <img 
           src={getImageSrc()} 
