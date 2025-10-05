@@ -2,44 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import TutorialCard from './components/TutorialCard';
 import './styles.css';
 
-const tutorialSteps = [
-  {
-    title: "1. Open Google",
-    description: "Go to the Internet, and type www.google.com",
-    detailedHelp: "Open your web browser (like Chrome, Firefox, or Safari). In the address bar at the top of the window, type 'www.google.com' and press the Enter key on your keyboard. This will take you to Google's homepage where you can search for anything.",
-    step: 1,
-    totalSteps: 5
-  },
-  {
-    title: "2. Search for recipes",
-    description: "Type 'easy dinner recipes' in the search box and press Enter",
-    detailedHelp: "Look for the large search box in the middle of the Google page. Click inside it with your mouse. Using your keyboard, type the words 'easy dinner recipes' (without the quotes). When you're done typing, press the Enter key or click the 'Google Search' button below the search box.",
-    step: 2,
-    totalSteps: 5
-  },
-  {
-    title: "3. Browse results",
-    description: "Look through the search results and click on a recipe that looks good",
-    detailedHelp: "Google will show you a list of websites with recipes. Each result has a title (in blue) and a short description below it. Scroll down the page to see more results. When you find a recipe that sounds interesting, click on the blue title to open that website.",
-    step: 3,
-    totalSteps: 5
-  },
-  {
-    title: "4. Read the recipe",
-    description: "Scroll down to see the ingredients and cooking instructions",
-    detailedHelp: "Once the recipe website opens, you'll need to scroll down to find the full recipe. Use your mouse wheel or the scroll bar on the right side of the window to move down the page. Look for sections labeled 'Ingredients' (what you need) and 'Instructions' or 'Directions' (how to make it).",
-    step: 4,
-    totalSteps: 5
-  },
-  {
-    title: "5. Save or print",
-    description: "Click the print button or bookmark the page to save it for later",
-    detailedHelp: "To save this recipe, you have two options: 1) To print it, look for a 'Print' button on the recipe page, or press Ctrl+P (Windows) or Command+P (Mac) on your keyboard. 2) To bookmark it, click the star icon in your browser's address bar, or press Ctrl+D (Windows) or Command+D (Mac). This saves the page so you can find it again later.",
-    step: 5,
-    totalSteps: 5
-  }
-];
-
 // Helper functions to manage saved progress
 function loadTutorialProgress() {
   const saved = sessionStorage.getItem('tutorialProgress');
@@ -58,6 +20,11 @@ function clearTutorialProgress() {
 function App() {
   const cardRef = useRef(null);
 
+  // State for tutorial data
+  const [tutorial, setTutorial] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   // Load saved progress or start at step 0
   const [currentStep, setCurrentStep] = useState(() => {
     const saved = loadTutorialProgress();
@@ -71,10 +38,59 @@ function App() {
 
   const [showDetailedHelp, setShowDetailedHelp] = useState(false);
 
-  const [tutorial] = useState({
-    title: "How to find recipes online",
-    steps: tutorialSteps
-  });
+  // Load default tutorial on mount
+  useEffect(() => {
+    setTutorial({
+      title: "How to find recipes online",
+      steps: getDefaultSteps()
+    });
+  }, []);
+
+  // Listen for tutorial requests from Electron via WebSocket
+  useEffect(() => {
+    if (window.electronAPI?.onTutorialRequest) {
+      window.electronAPI.onTutorialRequest((data) => {
+        console.log('Received tutorial request:', data);
+        fetchTutorial(data.transcription);
+      });
+    }
+  }, []);
+
+  // Fetch tutorial from backend
+  const fetchTutorial = async (transcription) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('http://localhost:5000/generate-howto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcription })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setTutorial({
+          title: result.data.title,
+          steps: result.data.steps
+        });
+        // Reset to first step for new tutorial
+        setCurrentStep(0);
+        setCompletedSteps([]);
+        setShowDetailedHelp(false);
+        clearTutorialProgress();
+      } else {
+        setError('Failed to generate tutorial');
+        console.error('Error from backend:', result.error);
+      }
+    } catch (err) {
+      console.error('Error fetching tutorial:', err);
+      setError('Could not connect to tutorial service');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Scroll to top of card when step changes
   useEffect(() => {
@@ -104,7 +120,7 @@ function App() {
       // Advance to next step
       setCurrentStep(currentStep + 1);
       
-      // Optional: notify Electron without advancing step
+      // Notify Electron
       if (window.electronAPI?.notifyStepChanged) {
         window.electronAPI.notifyStepChanged(currentStep + 1);
       }
@@ -133,11 +149,30 @@ function App() {
   };
 
   const handleClose = () => {
-    // Progress is saved automatically by TutorialCard
     if (window.electronAPI?.closePopup) {
       window.electronAPI.closePopup();
     }
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Generating your tutorial...</p>
+      </div>
+    );
+  }
+
+  // Error state (but still show UI)
+  if (error) {
+    console.error('Tutorial error:', error);
+  }
+
+  // No tutorial loaded yet
+  if (!tutorial) {
+    return <div className="loading">Loading...</div>;
+  }
 
   const currentStepData = tutorial.steps[currentStep];
   const progress = ((currentStepData.step) / currentStepData.totalSteps) * 100;
@@ -159,6 +194,47 @@ function App() {
       currentStepIndex={currentStep}
     />
   );
+}
+
+// Default steps fallback
+function getDefaultSteps() {
+  return [
+    {
+      title: "1. Open Google",
+      description: "Go to the Internet, and type www.google.com",
+      detailedHelp: "Open your web browser (like Chrome, Firefox, or Safari). In the address bar at the top of the window, type 'www.google.com' and press the Enter key on your keyboard. This will take you to Google's homepage where you can search for anything.",
+      step: 1,
+      totalSteps: 5
+    },
+    {
+      title: "2. Search for recipes",
+      description: "Type 'easy dinner recipes' in the search box and press Enter",
+      detailedHelp: "Look for the large search box in the middle of the Google page. Click inside it with your mouse. Using your keyboard, type the words 'easy dinner recipes' (without the quotes). When you're done typing, press the Enter key or click the 'Google Search' button below the search box.",
+      step: 2,
+      totalSteps: 5
+    },
+    {
+      title: "3. Browse results",
+      description: "Look through the search results and click on a recipe that looks good",
+      detailedHelp: "Google will show you a list of websites with recipes. Each result has a title (in blue) and a short description below it. Scroll down the page to see more results. When you find a recipe that sounds interesting, click on the blue title to open that website.",
+      step: 3,
+      totalSteps: 5
+    },
+    {
+      title: "4. Read the recipe",
+      description: "Scroll down to see the ingredients and cooking instructions",
+      detailedHelp: "Once the recipe website opens, you'll need to scroll down to find the full recipe. Use your mouse wheel or the scroll bar on the right side of the window to move down the page. Look for sections labeled 'Ingredients' (what you need) and 'Instructions' or 'Directions' (how to make it).",
+      step: 4,
+      totalSteps: 5
+    },
+    {
+      title: "5. Save or print",
+      description: "Click the print button or bookmark the page to save it for later",
+      detailedHelp: "To save this recipe, you have two options: 1) To print it, look for a 'Print' button on the recipe page, or press Ctrl+P (Windows) or Command+P (Mac) on your keyboard. 2) To bookmark it, click the star icon in your browser's address bar, or press Ctrl+D (Windows) or Command+D (Mac). This saves the page so you can find it again later.",
+      step: 5,
+      totalSteps: 5
+    }
+  ];
 }
 
 export default App;

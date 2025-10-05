@@ -63,6 +63,13 @@ function startWebSocketServer() {
         case 'setTutorial':
           mainWindow.webContents.send('set-tutorial', data.tutorial);
           break;
+        case 'showHowTo':
+          // New: Handle how-to tutorial requests
+          mainWindow.show();
+          mainWindow.webContents.send('new-tutorial-request', { 
+            transcription: data.transcription 
+          });
+          break;
         default:
           console.log('Unknown command:', data.command);
       }
