@@ -10,7 +10,7 @@ ACCESS_KEY = os.getenv("ACCESS_KEY")
 
 elda = pvporcupine.create(
     access_key=ACCESS_KEY, 
-    keyword_paths=["hey_elda.ppn"]
+    keyword_paths=["hello_elda.ppn"]
 )
 
 # Flag to trigger processing outside the callback
@@ -28,6 +28,12 @@ def audio_callback(indata, frames, time, status):
     if result >= 0:
         print("🎤 Wake word 'Hey Elda' detected!")
         wake_word_detected = True
+        # Show listening state immediately
+        try:
+            from websocket_client import trigger_electron_listening
+            trigger_electron_listening()
+        except Exception as e:
+            print(f"⚠️ Error showing listening state: {e}")
 
 # Main loop
 print("👂 Listening for 'Hey Elda'... Press Ctrl+C to stop.")

@@ -52,4 +52,3 @@ function EldaState({ state, transcription }) {
 }
 
 export default EldaState;
-
