@@ -12,48 +12,35 @@ class ZoomController:
     def __init__(self):
         self.current_zoom = 1.0
     
-    def check_accessibility_permissions(self):
-        """Check if Terminal has accessibility permissions"""
-        print("Checking accessibility permissions...")
-        try:
-            from ApplicationServices import AXUIElementCreateSystemWide
-            system_wide = AXUIElementCreateSystemWide()
-            
-            if system_wide:
-                print("✓ Accessibility permissions granted")
-                return True
-            else:
-                print("✗ Need accessibility permissions")
-                print("Go to: System Settings → Privacy & Security → Accessibility")
-                print("Add Terminal (or your IDE) to the list")
-                return False
-        except Exception as e:
-            print(f"✗ Error checking permissions: {e}")
-            return False
-    
     def zoom_toggle(self):
-        """Test toggling zoom on/off"""
+        """Toggle zoom on/off more reliably"""
         print("Testing zoom toggle (Command+Option+8)...")
         try:
-            result = subprocess.run([
-                'osascript',
-                '-e',
-                'tell application "System Events" to key code 28 using {command down, option down}'
-            ], capture_output=True, text=True, timeout=5)
-            
+            # Press and release the keys twice slowly to ensure macOS registers
+            applescript = '''
+                tell application "System Events"
+                key down command
+                key down option
+                key code 28
+                delay 0.5
+                key code 28
+                key up option
+                key up command
+            end tell
+            '''
+            result = subprocess.run(['osascript', '-e', applescript],
+                                capture_output=True, text=True, timeout=5)
+        
             if result.returncode == 0:
                 print("✓ Zoom toggle successful")
                 return True
             else:
                 print(f"✗ Zoom toggle failed: {result.stderr}")
                 return False
-        except subprocess.TimeoutExpired:
-            print("✗ Command timed out")
-            return False
         except Exception as e:
             print(f"✗ Error: {e}")
             return False
-    
+
     def zoom_in(self):
         """Test zooming in"""
         print("\nTesting zoom in (Command+Option+=)...")
@@ -99,12 +86,7 @@ class ZoomController:
         print("=" * 60)
         print("ZOOM CONTROLLER - BASIC TEST")
         print("=" * 60)
-        
-        # Check permissions first
-        if not self.check_accessibility_permissions():
-            print("\n⚠️  Fix accessibility permissions before continuing")
-            return False
-        
+
         print("\n" + "=" * 60)
         print("Running zoom tests...")
         print("=" * 60)

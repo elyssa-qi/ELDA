@@ -1,3 +1,4 @@
+# list gemini models
 # list_models.py
 from google import genai
 from dotenv import load_dotenv
