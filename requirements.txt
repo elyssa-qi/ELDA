@@ -1,0 +1,14 @@
+requests
+python-dotenv
+sounddevice
+wavio
+google-genai
+pvporcupine
+increasevolume
+pillow
+flask
+flask-cors
+pyobjc
+pygame
+openai
+
