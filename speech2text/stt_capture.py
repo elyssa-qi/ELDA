@@ -1,6 +1,9 @@
 import os
 import sounddevice as sd
 import wavio
+from zoom_controller.zoom_controller import ZoomController
+from brightness import parse_command as brightness_parse_command
+from volume import parse_command as volume_parse_command
 from dotenv import load_dotenv
 from google import genai
 from openai import OpenAI
@@ -59,6 +62,8 @@ A user said: "{transcribed_text}"
 Analyze the request and return ONLY one of these exact intents:
 - zoom_in
 - increase_volume
+- adjust_volume
+- adjust_brightness
 - how_to_do_something
 - read_text
 - other
@@ -89,7 +94,11 @@ def handle_command(transcribed_text: str, intent: str):
     
     if intent == "zoom_in":
         print("🔍 Zoom in command detected!")
-        # TODO: Implement zoom functionality
+        try:
+            zoom_controller = ZoomController()
+            zoom_controller.zoom_in()
+        except Exception as e:
+            print(f"Error with zoom: {e}")
         
     elif intent == "read_text":
         print("📖 Read text command detected!")
@@ -98,7 +107,15 @@ def handle_command(transcribed_text: str, intent: str):
         
     elif intent == "increase_volume":
         print("🔊 Increase volume command detected!")
+        volume_parse_command(transcribed_text)
+        
+    elif intent == "adjust_volume":
+        print("🔊 Volume command detected!")
+        volume_parse_command(transcribed_text)
 
+    elif intent == "adjust_brightness":
+        print("💡 Brightness command detected!")
+        brightness_parse_command(transcribed_text)
         
     elif intent == "how_to_do_something":
         print("📚 How-to command detected!")
@@ -108,6 +125,15 @@ def handle_command(transcribed_text: str, intent: str):
         
         # The Electron frontend will fetch from Flask when it loads
         print("✅ Electron window triggered!")
+        
+    # Additional keyword-based detection for better coverage
+    elif any(word in transcribed_text.lower() for word in ["brightness", "dim", "bright", "increase brightness", "decrease brightness"]):
+        print("💡 Brightness command detected!")
+        brightness_parse_command(transcribed_text)
+
+    elif any(word in transcribed_text.lower() for word in ["volume", "louder", "quieter", "mute"]):
+        print("🔊 Volume command detected!")
+        volume_parse_command(transcribed_text)
 # ---------------- Full Pipeline ---------------- #
 def listen_and_process():
     """
