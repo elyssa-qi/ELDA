@@ -27,5 +27,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('new-tutorial-request', (event, data) => {
       callback(data);
     });
+  },
+  
+  // Listen for state changes
+  onSetState: (callback) => {
+    ipcRenderer.on('set-state', (event, data) => {
+      callback(data);
+    });
+  },
+
+  // Send commands to main process
+  sendCommand: (command) => {
+    ipcRenderer.send('renderer-command', command);
   }
 });

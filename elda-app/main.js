@@ -14,10 +14,10 @@ function createWindow() {
     height: 450,
     x: width - 600,
     y: 20,
-    frame: false,
-    transparent: true,
+    frame: true,
+    transparent: false,
     alwaysOnTop: true,
-    skipTaskbar: true,
+    skipTaskbar: false,
     resizable: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -28,9 +28,8 @@ function createWindow() {
 
   mainWindow.loadFile('renderer/index.html');
 
-  if (process.argv.includes('--dev')) {
-    mainWindow.webContents.openDevTools({ mode: 'detach' });
-  }
+  // Always open dev tools for debugging
+  mainWindow.webContents.openDevTools({ mode: 'detach' });
 
   mainWindow.on('close', (event) => {
     if (!app.isQuitting) {
@@ -52,7 +51,15 @@ function startWebSocketServer() {
 
       switch (data.command) {
         case 'show':
+          console.log('Showing window...');
           mainWindow.show();
+          mainWindow.focus();
+          break;
+        case 'showListening':
+          console.log('Showing listening state...');
+          mainWindow.show();
+          mainWindow.focus();
+          mainWindow.webContents.send('set-state', { state: 'listening' });
           break;
         case 'hide':
           mainWindow.hide();
@@ -65,10 +72,17 @@ function startWebSocketServer() {
           break;
         case 'showHowTo':
           // New: Handle how-to tutorial requests
+          console.log('Showing how-to window with transcription:', data.transcription);
           mainWindow.show();
+          mainWindow.focus();
           mainWindow.webContents.send('new-tutorial-request', { 
             transcription: data.transcription 
           });
+          break;
+        case 'showTutorial':
+          // Switch to full tutorial mode
+          console.log('Switching to full tutorial mode...');
+          mainWindow.webContents.send('set-state', { state: 'tutorial' });
           break;
         default:
           console.log('Unknown command:', data.command);
@@ -94,6 +108,19 @@ ipcMain.on('need-help', () => {
 
 ipcMain.on('close-popup', () => {
   mainWindow.hide();
+});
+
+ipcMain.on('renderer-command', (event, command) => {
+  console.log('Received command from renderer:', command);
+  // Handle the command as if it came from WebSocket
+  const mockData = { command };
+  switch (command) {
+    case 'showTutorial':
+      mainWindow.webContents.send('set-state', { state: 'tutorial' });
+      break;
+    default:
+      console.log('Unknown renderer command:', command);
+  }
 });
 
 function broadcastToPython(data) {

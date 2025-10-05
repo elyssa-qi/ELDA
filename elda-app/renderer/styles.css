@@ -21,6 +21,64 @@
     position: relative;
     -webkit-app-region: no-drag;
   }
+
+  /* Elda State Styles */
+  .elda-state-container {
+    background: #F5F5F5;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    padding: 40px;
+    width: 580px;
+    height: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    -webkit-app-region: no-drag;
+  }
+
+  .elda-image-container {
+    margin-bottom: 20px;
+  }
+
+  .elda-image {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 10px;
+  }
+
+  .elda-image.listening {
+    animation: pulse 2s infinite;
+  }
+
+  .elda-image.thinking {
+    /* GIF will animate automatically */
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .elda-text {
+    color: #333;
+  }
+
+  .elda-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #2c3e50;
+  }
+
+  .elda-subtitle {
+    font-size: 16px;
+    color: #7f8c8d;
+    line-height: 1.4;
+  }
   
   /* Close button */
   .close-btn {

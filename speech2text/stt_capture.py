@@ -8,6 +8,7 @@ import requests
 from websocket_client import trigger_electron_howto
 
 load_dotenv()
+print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY"))
 
 # ---------------- Keys ---------------- #
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")

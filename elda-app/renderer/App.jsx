@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import TutorialCard from './components/TutorialCard';
+import EldaState from './components/EldaState';
 import './styles.css';
 
 // Helper functions to manage saved progress
@@ -19,6 +20,10 @@ function clearTutorialProgress() {
 
 function App() {
   const cardRef = useRef(null);
+
+  // State for Elda states
+  const [eldaState, setEldaState] = useState('listening'); // 'listening', 'thinking', 'tutorial'
+  const [currentTranscription, setCurrentTranscription] = useState('');
 
   // State for tutorial data
   const [tutorial, setTutorial] = useState(null);
@@ -40,29 +45,51 @@ function App() {
 
   // Load default tutorial on mount
   useEffect(() => {
-    setTutorial({
+    console.log('🚀 Loading default tutorial...');
+    const defaultTutorial = {
       title: "How to find recipes online",
       steps: getDefaultSteps()
-    });
+    };
+    console.log('📚 Setting tutorial:', defaultTutorial);
+    setTutorial(defaultTutorial);
   }, []);
 
   // Listen for tutorial requests from Electron via WebSocket
   useEffect(() => {
+    console.log('Setting up tutorial request listener...');
+    console.log('window.electronAPI:', window.electronAPI);
+    
     if (window.electronAPI?.onTutorialRequest) {
+      console.log('Setting up onTutorialRequest listener');
       window.electronAPI.onTutorialRequest((data) => {
         console.log('Received tutorial request:', data);
+        setCurrentTranscription(data.transcription);
+        setEldaState('thinking');
         fetchTutorial(data.transcription);
+      });
+    } else {
+      console.log('❌ window.electronAPI.onTutorialRequest not available');
+    }
+
+    // Listen for state changes
+    if (window.electronAPI?.onSetState) {
+      console.log('Setting up onSetState listener');
+      window.electronAPI.onSetState((data) => {
+        console.log('Received state change:', data);
+        setEldaState(data.state);
       });
     }
   }, []);
 
   // Fetch tutorial from backend
   const fetchTutorial = async (transcription) => {
+    console.log('🔄 Starting fetchTutorial with transcription:', transcription);
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:5000/generate-howto', {
+      console.log('📡 Making request to Flask backend...');
+      const response = await fetch('http://localhost:3000/generate-howto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transcription })
@@ -80,13 +107,23 @@ function App() {
         setCompletedSteps([]);
         setShowDetailedHelp(false);
         clearTutorialProgress();
+        // Switch to tutorial state
+        setEldaState('tutorial');
+        // Tell Electron to switch to full tutorial mode
+        if (window.electronAPI?.sendCommand) {
+          window.electronAPI.sendCommand('showTutorial');
+        }
       } else {
         setError('Failed to generate tutorial');
         console.error('Error from backend:', result.error);
+        // Go back to listening state on error
+        setEldaState('listening');
       }
     } catch (err) {
       console.error('Error fetching tutorial:', err);
       setError('Could not connect to tutorial service');
+      // Go back to listening state on error
+      setEldaState('listening');
     } finally {
       setLoading(false);
     }
@@ -149,49 +186,59 @@ function App() {
   };
 
   const handleClose = () => {
+    setEldaState('listening');
     if (window.electronAPI?.closePopup) {
       window.electronAPI.closePopup();
     }
   };
 
-  // Loading state
-  if (loading) {
+  // Show different states based on eldaState
+  if (eldaState === 'listening') {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Generating your tutorial...</p>
-      </div>
+      <EldaState 
+        state="listening" 
+        transcription="" 
+      />
     );
   }
 
-  // Error state (but still show UI)
-  if (error) {
-    console.error('Tutorial error:', error);
+  if (eldaState === 'thinking') {
+    return (
+      <EldaState 
+        state="thinking" 
+        transcription={currentTranscription} 
+      />
+    );
   }
 
-  // No tutorial loaded yet
-  if (!tutorial) {
-    return <div className="loading">Loading...</div>;
+  if (eldaState === 'tutorial' && tutorial) {
+    const currentStepData = tutorial.steps[currentStep];
+    const progress = ((currentStepData.step) / currentStepData.totalSteps) * 100;
+
+    return (
+      <TutorialCard
+        title={tutorial.title}
+        stepTitle={currentStepData.title}
+        stepDescription={currentStepData.description}
+        detailedHelp={currentStepData.detailedHelp}
+        showDetailedHelp={showDetailedHelp}
+        stepIndicator={`Step ${currentStepData.step} of ${currentStepData.totalSteps}`}
+        progress={progress}
+        isLastStep={currentStep === tutorial.steps.length - 1}
+        onNextStep={handleNextStep}
+        onNeedHelp={handleNeedHelp}
+        onClose={handleClose}
+        completedSteps={completedSteps}
+        currentStepIndex={currentStep}
+      />
+    );
   }
 
-  const currentStepData = tutorial.steps[currentStep];
-  const progress = ((currentStepData.step) / currentStepData.totalSteps) * 100;
-
+  // Fallback to listening state
   return (
-    <TutorialCard
-      title={tutorial.title}
-      stepTitle={currentStepData.title}
-      stepDescription={currentStepData.description}
-      detailedHelp={currentStepData.detailedHelp}
-      showDetailedHelp={showDetailedHelp}
-      stepIndicator={`Step ${currentStepData.step} of ${currentStepData.totalSteps}`}
-      progress={progress}
-      isLastStep={currentStep === tutorial.steps.length - 1}
-      onNextStep={handleNextStep}
-      onNeedHelp={handleNeedHelp}
-      onClose={handleClose}
-      completedSteps={completedSteps}
-      currentStepIndex={currentStep}
+    <EldaState 
+      state="listening" 
+      transcription="" 
     />
   );
 }
