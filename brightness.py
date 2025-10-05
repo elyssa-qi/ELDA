@@ -1,117 +1,68 @@
 import subprocess
-import re
+import time
 
-def get_current_brightness():
-    """Get the current display brightness (0-100)"""
-    try:
-        result = subprocess.run(
-            ["osascript", "-e", "tell application \"System Events\" to get value of slider 1 of group 1 of tab group 1 of window 1 of application process \"System Settings\""],
-            capture_output=True,
-            text=True
-        )
-        # Alternative method using brightnessctl if available
-        if result.returncode != 0:
-            result = subprocess.run(
-                ["brightnessctl", "get"],
-                capture_output=True,
-                text=True
-            )
-            if result.returncode == 0:
-                # brightnessctl returns values like 255, convert to percentage
-                brightness = int(result.stdout.strip())
-                return int((brightness / 255) * 100)
-        
-        # Fallback: try to get from system
-        return 50  # Default fallback
-    except Exception as e:
-        print(f"Error getting brightness: {e}")
-        return 50
+def increase_brightness():
+    """Increase brightness by 25%"""
+    print("🔆 Increasing brightness by 25%...")
+    
+    # Try multiple approaches to increase brightness
+    # Method 1: F1 key (key code 144) - most common for brightness up
+    for i in range(4):  # 4 presses for ~25% increase
+        subprocess.run([
+            "osascript", "-e",
+            'tell application "System Events" to key code 144'
+        ], check=False)
+        time.sleep(0.1)  # Small delay between presses
+    
+    # Method 2: If F1 doesn't work, try F15 (key code 107)
+    time.sleep(0.5)
+    for i in range(2):  # Backup method
+        subprocess.run([
+            "osascript", "-e",
+            'tell application "System Events" to key code 107'
+        ], check=False)
+        time.sleep(0.1)
+    
+    # Show native brightness overlay
+    subprocess.run([
+        "osascript", "-e", 
+        """
+        tell application "System Events"
+            key code 144 -- Trigger overlay
+            delay 0.2
+        end tell
+        """
+    ], check=False)
 
-def set_brightness(level):
-    """Set the display brightness to a specific level (0-100)"""
-    level = max(0, min(100, level))  # Clamp between 0-100
-    try:
-        # Try brightnessctl first (if available)
-        result = subprocess.run(
-            ["brightnessctl", "set", f"{level}%"],
-            capture_output=True,
-            text=True
-        )
-        if result.returncode == 0:
-            print(f"Brightness set to {level}%")
-            return
-        
-        # Fallback to AppleScript
-        subprocess.run(
-            ["osascript", "-e", f"tell application \"System Events\" to set value of slider 1 of group 1 of tab group 1 of window 1 of application process \"System Settings\" to {level}"],
-            check=True
-        )
-        print(f"Brightness set to {level}%")
-    except Exception as e:
-        print(f"Error setting brightness: {e}")
-
-def adjust_brightness(change):
-    """Adjust brightness by a relative amount (+/- percentage)"""
-    current = get_current_brightness()
-    new_brightness = current + change
-    new_brightness = max(0, min(100, new_brightness))
-    set_brightness(new_brightness)
-    print(f"Brightness adjusted from {current}% to {new_brightness}%")
-
-def parse_command(command):
-    """Parse text command and adjust brightness accordingly"""
-    command = command.lower().strip()
-
-    # Check for "increase/raise/up" commands
-    if any(word in command for word in ["increase", "raise", "up", "brighter", "higher"]):
-        # Check for specific amount
-        numbers = re.findall(r'\d+', command)
-        amount = int(numbers[0]) if numbers else 10
-        adjust_brightness(amount)
-
-    # Check for "decrease/lower/down" commands
-    elif any(word in command for word in ["decrease", "lower", "down", "dimmer", "dim", "softer"]):
-        numbers = re.findall(r'\d+', command)
-        amount = int(numbers[0]) if numbers else 10
-        adjust_brightness(-amount)
-
-    # Check for "set to" or specific number
-    elif "set" in command or "to" in command:
-        numbers = re.findall(r'\d+', command)
-        if numbers:
-            set_brightness(int(numbers[0]))
-        else:
-            print("Please specify a brightness level (0-100)")
-
-    # Check for minimum/maximum
-    elif any(word in command for word in ["min", "minimum", "darkest"]):
-        set_brightness(0)
-
-    elif any(word in command for word in ["max", "maximum", "brightest", "full"]):
-        set_brightness(100)
-
-    # Check for current/status
-    elif any(word in command for word in ["current", "status", "what", "level"]):
-        current = get_current_brightness()
-        print(f"Current brightness: {current}%")
-
-    else:
-        print("Command not recognized. Try:")
-        print("  - 'increase brightness' or 'increase brightness by 20'")
-        print("  - 'decrease brightness' or 'decrease brightness by 15'")
-        print("  - 'set brightness to 50'")
-        print("  - 'minimum brightness' or 'maximum brightness'")
-        print("  - 'current brightness'")
-
-if __name__ == "__main__":
-    print("AI Brightness Control Agent")
-    print("Commands: increase/decrease/set/min/max/current")
-    print("Type 'quit' to exit\n")
-
-    while True:
-        command = input("Enter command: ").strip()
-        if command.lower() in ["quit", "exit", "q"]:
-            print("Goodbye!")
-            break
-        if command:
-            parse_command(command)
+def decrease_brightness():
+    """Decrease brightness by 25%"""
+    print("🌙 Decreasing brightness by 25%...")
+    
+    # Try multiple approaches to decrease brightness
+    # Method 1: F2 key (key code 145) - most common for brightness down
+    for i in range(4):  # 4 presses for ~25% decrease
+        subprocess.run([
+            "osascript", "-e",
+            'tell application "System Events" to key code 145'
+        ], check=False)
+        time.sleep(0.1)  # Small delay between presses
+    
+    # Method 2: If F2 doesn't work, try F14 (key code 113)
+    time.sleep(0.5)
+    for i in range(2):  # Backup method
+        subprocess.run([
+            "osascript", "-e",
+            'tell application "System Events" to key code 113'
+        ], check=False)
+        time.sleep(0.1)
+    
+    # Show native brightness overlay
+    subprocess.run([
+        "osascript", "-e", 
+        """
+        tell application "System Events"
+            key code 145 -- Trigger overlay
+            delay 0.2
+        end tell
+        """
+    ], check=False)

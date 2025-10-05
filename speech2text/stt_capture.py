@@ -2,7 +2,7 @@ import os
 import sounddevice as sd
 import wavio
 from zoom_controller.zoom_controller import ZoomController
-from brightness import parse_command as brightness_parse_command
+from brightness import increase_brightness, decrease_brightness
 from volume import parse_command as volume_parse_command
 from dotenv import load_dotenv
 from google import genai
@@ -21,7 +21,7 @@ client_openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 client = genai.Client(api_key=GEMINI_KEY)
 
 # ---------------- Audio Recording ---------------- #
-def record_audio(filename="command.wav", duration=10, fs=16000):
+def record_audio(filename="command.wav", duration=5, fs=16000):
     """
     Records audio from the microphone and saves to a WAV file.
     """
@@ -61,6 +61,7 @@ A user said: "{transcribed_text}"
 
 Analyze the request and return ONLY one of these exact intents:
 - zoom_in
+- zoom_out
 - increase_volume
 - adjust_volume
 - adjust_brightness
@@ -99,6 +100,14 @@ def handle_command(transcribed_text: str, intent: str):
             zoom_controller.zoom_in()
         except Exception as e:
             print(f"Error with zoom: {e}")
+    
+    elif intent == "zoom_out":
+        print("🔍 Zoom out command detected!")
+        try:
+            zoom_controller = ZoomController()
+            zoom_controller.zoom_out()
+        except Exception as e:
+            print(f"Error with zoom: {e}")
         
     elif intent == "read_text":
         print("📖 Read text command detected!")
@@ -115,7 +124,14 @@ def handle_command(transcribed_text: str, intent: str):
 
     elif intent == "adjust_brightness":
         print("💡 Brightness command detected!")
-        brightness_parse_command(transcribed_text)
+        # Determine if it's increase or decrease based on keywords
+        if any(word in transcribed_text.lower() for word in ["increase", "raise", "up", "brighter", "higher"]):
+            increase_brightness()
+        elif any(word in transcribed_text.lower() for word in ["decrease", "lower", "down", "dimmer", "darker"]):
+            decrease_brightness()
+        else:
+            # Default to increase if unclear
+            increase_brightness()
         
     elif intent == "how_to_do_something":
         print("📚 How-to command detected!")
@@ -129,7 +145,14 @@ def handle_command(transcribed_text: str, intent: str):
     # Additional keyword-based detection for better coverage
     elif any(word in transcribed_text.lower() for word in ["brightness", "dim", "bright", "increase brightness", "decrease brightness"]):
         print("💡 Brightness command detected!")
-        brightness_parse_command(transcribed_text)
+        # Determine if it's increase or decrease based on keywords
+        if any(word in transcribed_text.lower() for word in ["increase", "raise", "up", "brighter", "higher"]):
+            increase_brightness()
+        elif any(word in transcribed_text.lower() for word in ["decrease", "lower", "down", "dimmer", "darker"]):
+            decrease_brightness()
+        else:
+            # Default to increase if unclear
+            increase_brightness()
 
     elif any(word in transcribed_text.lower() for word in ["volume", "louder", "quieter", "mute"]):
         print("🔊 Volume command detected!")
@@ -140,7 +163,7 @@ def listen_and_process():
     Full pipeline: record -> transcribe -> detect intent -> handle command
     """
     # Step 1: Record audio
-    audio_file = record_audio(duration=10)
+    audio_file = record_audio(duration=5)
     
     # Step 2: Transcribe with Whisper
     command_text = transcribe_whisper(audio_file)

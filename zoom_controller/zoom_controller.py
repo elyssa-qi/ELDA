@@ -54,42 +54,52 @@ class ZoomController:
             print(f"✗ Error: {e}")
             return False
     
-    def zoom_in(self):
-        """Test zooming in"""
-        print("\nTesting zoom in (Command+Option+=)...")
+    def zoom_in(self, steps=3):
+        """Zoom in with multiple steps for larger zoom"""
+        print(f"\nZooming in {steps} steps (Command+Option+=)...")
         try:
-            result = subprocess.run([
-                'osascript',
-                '-e',
-                'tell application "System Events" to key code 24 using {command down, option down}'
-            ], capture_output=True, text=True, timeout=5)
+            for i in range(steps):
+                result = subprocess.run([
+                    'osascript',
+                    '-e',
+                    'tell application "System Events" to key code 24 using {command down, option down}'
+                ], capture_output=True, text=True, timeout=5)
+                
+                if result.returncode != 0:
+                    print(f"✗ Zoom in step {i+1} failed: {result.stderr}")
+                    return False
+                
+                # Small delay between steps
+                import time
+                time.sleep(0.05)
             
-            if result.returncode == 0:
-                print("✓ Zoom in successful")
-                return True
-            else:
-                print(f"✗ Zoom in failed: {result.stderr}")
-                return False
+            print(f"✓ Zoom in successful ({steps} steps)")
+            return True
         except Exception as e:
             print(f"✗ Error: {e}")
             return False
     
-    def zoom_out(self):
-        """Test zooming out"""
-        print("\nTesting zoom out (Command+Option+-)...")
+    def zoom_out(self, steps=3):
+        """Zoom out with multiple steps for larger zoom reduction"""
+        print(f"\nZooming out {steps} steps (Command+Option+-)...")
         try:
-            result = subprocess.run([
-                'osascript',
-                '-e',
-                'tell application "System Events" to key code 27 using {command down, option down}'
-            ], capture_output=True, text=True, timeout=5)
+            for i in range(steps):
+                result = subprocess.run([
+                    'osascript',
+                    '-e',
+                    'tell application "System Events" to key code 27 using {command down, option down}'
+                ], capture_output=True, text=True, timeout=5)
+                
+                if result.returncode != 0:
+                    print(f"✗ Zoom out step {i+1} failed: {result.stderr}")
+                    return False
+                
+                # Small delay between steps
+                import time
+                time.sleep(0.05)
             
-            if result.returncode == 0:
-                print("✓ Zoom out successful")
-                return True
-            else:
-                print(f"✗ Zoom out failed: {result.stderr}")
-                return False
+            print(f"✓ Zoom out successful ({steps} steps)")
+            return True
         except Exception as e:
             print(f"✗ Error: {e}")
             return False
