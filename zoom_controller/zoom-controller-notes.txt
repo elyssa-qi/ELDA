@@ -1,0 +1,10 @@
+1. Enable in System Settings --> Privacy & Security --> Accessibility 
+-  add and enable visualstudio code and python3 (or python), 
+
+2. Open systems settings --> privacy and security --> automation
+- look for terminal
+- make sure system events is check/enabeld for VISUAL STUDIO CODE
+
+3. Open System Settings --> accessibility --> zoom
+- use keyboard shortcuts to zoom 
+- use scroll gesture modifier keys to zoom
