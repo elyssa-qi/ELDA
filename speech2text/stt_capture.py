@@ -2,6 +2,8 @@ import os
 import sounddevice as sd
 import wavio
 from zoom_controller.zoom_controller import ZoomController
+from brightness import parse_command as brightness_parse_command
+from volume import parse_command as volume_parse_command
 from dotenv import load_dotenv
 from google import genai
 from openai import OpenAI
@@ -63,6 +65,9 @@ Analyze the request and return ONLY one of these exact intents:
 - increase_volume 
 - how_to_do_something
 - read_text
+- adjust brightness
+- increase_volume
+- adjust_volume
 - other
 
 Return only the intent name, nothing else."""
@@ -108,6 +113,14 @@ def handle_command(transcribed_text: str, intent: str):
     elif intent == "increase_volume":
         print("🔊 Increase volume command detected!")
         # TODO: Implement actual volume increase functionality
+
+    elif any(word in transcribed_text.lower() for word in ["brightness", "dim", "bright", "increase brightness", "decrease brightness"]):
+        print("💡 Brightness command detected!")
+        brightness_parse_command(transcribed_text)
+
+    elif any(word in transcribed_text.lower() for word in ["volume", "louder", "quieter", "mute"]):
+        print("🔊 Volume command detected!")
+        volume_parse_command(transcribed_text)
 
     elif intent == "how_to_do_something":
         print("📚 How-to command detected!")
