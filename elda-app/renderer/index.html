@@ -4,53 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ELDA Tutorial</title>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: transparent;
+      overflow: hidden;
+      -webkit-app-region: drag;
+      user-select: none;
+    }
+    
+    #root {
+      -webkit-app-region: no-drag;
+    }
+  </style>
 </head>
 <body>
-  <div class="popup-container">
-    <!-- Close button -->
-    <button class="close-btn" id="closeBtn">×</button>
-    
-    <!-- Header with avatar and progress -->
-    <div class="header">
-      <div class="avatar">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <!-- Simple avatar illustration -->
-          <circle cx="50" cy="50" r="45" fill="#E8F4F8"/>
-          <circle cx="50" cy="40" r="15" fill="#5DADE2"/>
-          <path d="M 25 70 Q 50 55 75 70" fill="#5DADE2"/>
-          <!-- Glasses -->
-          <rect x="32" y="35" width="15" height="12" rx="2" fill="none" stroke="#333" stroke-width="2"/>
-          <rect x="53" y="35" width="15" height="12" rx="2" fill="none" stroke="#333" stroke-width="2"/>
-          <line x1="47" y1="41" x2="53" y2="41" stroke="#333" stroke-width="2"/>
-          <!-- Hair -->
-          <path d="M 35 25 Q 50 15 65 25" fill="#A8D8EA"/>
-        </svg>
-      </div>
-      
-      <div class="header-content">
-        <h2 id="tutorialTitle">How to find recipes online</h2>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <p class="step-indicator" id="stepIndicator">Step 1 of 5</p>
-      </div>
-      
-      <div class="progress-percentage" id="progressPercentage">20%</div>
-    </div>
-
-    <!-- Step content -->
-    <div class="step-content">
-      <h3 id="stepTitle">1. Open Google</h3>
-      <p id="stepDescription">Go to the Internet, and type www.google.com</p>
-      
-      <div class="button-group">
-        <button class="btn btn-primary" id="nextBtn">Next Step</button>
-        <button class="btn btn-secondary" id="helpBtn">Need More Help?</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
+  <div id="root"></div>
+  <script src="dist/bundle.js"></script>
 </body>
 </html>

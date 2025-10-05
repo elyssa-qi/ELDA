@@ -8,7 +8,7 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background: transparent;
     overflow: hidden;
-    -webkit-app-region: drag; /* Make window draggable */
+    -webkit-app-region: drag;
     user-select: none;
   }
   
@@ -19,20 +19,20 @@
     padding: 30px;
     width: 580px;
     position: relative;
-    -webkit-app-region: no-drag; /* Content should not drag */
+    -webkit-app-region: no-drag;
   }
   
   /* Close button */
   .close-btn {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 10px;
+    right: 10px;
     background: rgba(0, 0, 0, 0.1);
     border: none;
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    font-size: 24px;
+    width: 20px;
+    height: 20px;
+    font-size: 18px;
     line-height: 1;
     cursor: pointer;
     color: #666;
@@ -90,10 +90,9 @@
   
   .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%);
+    background: linear-gradient(90deg, #37CFCF 0%, #37CFCF 100%);
     border-radius: 4px;
     transition: width 0.3s ease;
-    width: 20%;
   }
   
   .step-indicator {
@@ -146,12 +145,12 @@
     cursor: pointer;
     transition: all 0.2s;
     -webkit-app-region: no-drag;
+    flex: 1;
   }
   
   .btn-primary {
-    background: linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%);
+    background: linear-gradient(90deg, #37CFCF 0%, #37CFCF 100%);
     color: white;
-    flex: 1;
   }
   
   .btn-primary:hover {
@@ -166,7 +165,6 @@
   .btn-secondary {
     background: linear-gradient(90deg, #FFA726 0%, #FF9800 100%);
     color: white;
-    flex: 1;
   }
   
   .btn-secondary:hover {
@@ -176,4 +174,83 @@
   
   .btn-secondary:active {
     transform: translateY(0);
+  }
+
+  .completed-steps-container {
+    margin: 16px 0;
+    padding: 0;
+  }
+  
+  .completed-step-inline {
+    padding: 10px 16px;
+    margin-bottom: 8px;
+    background: #f5f5f5;
+  }
+  
+  .completed-step-header-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .checkmark-small {
+    flex-shrink: 0;
+  }
+  
+  .completed-step-title {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+  }
+  .popup-container {
+    overflow-y: auto;
+    max-height: 90vh; /* or whatever height you want */
+  }
+
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 16px;
+  }
+  
+  /* Add shadow when scrolled */
+  .sticky-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .popup-container {
+    overflow-y: auto;
+    max-height: 90vh;
+    position: relative;
+  }
+
+  .detailed-help {
+    overflow: hidden;
+  }
+  
+  .detailed-help-content {
+    background: #fff4e6;  /* Light orange background */
+    border-left: 4px solid #ff8c42;  /* Orange border */
+    padding: 16px;
+    border-bottom:10px;
+    border-radius: 8px;
+  }
+  
+  .detailed-help-content p {
+    margin: 0;
+    color: #333;
+    line-height: 1.6;
+    font-size: 14px;
   }
