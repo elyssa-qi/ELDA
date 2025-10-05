@@ -138,10 +138,9 @@ npm start
 - **"Hey Elda, how do I [action]"** - Get step-by-step guidance
 
 ### Examples
-- "Hey Elda, show me how to ride a bike"
-- "Hey Elda, how do I send an email"
-- "Hey Elda, make it louder"
-- "Hey Elda, zoom in please"
+- "Hey Elda, how do I send an email?"
+- "Hey Elda, can you make this video louder?"
+- "Hey Elda, zoom in on the screen please?"
 
 ## 🔧 Configuration
 
