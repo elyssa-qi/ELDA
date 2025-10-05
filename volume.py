@@ -38,13 +38,13 @@ def parse_command(command):
     if any(word in command for word in ["increase", "raise", "up", "louder", "higher"]):
         # Check for specific amount
         numbers = re.findall(r'\d+', command)
-        amount = int(numbers[0]) if numbers else 10
+        amount = int(numbers[0]) if numbers else 50
         adjust_volume(amount)
 
     # Check for "decrease/lower/down" commands
     elif any(word in command for word in ["decrease", "lower", "down", "quieter", "softer"]):
         numbers = re.findall(r'\d+', command)
-        amount = int(numbers[0]) if numbers else 10
+        amount = int(numbers[0]) if numbers else 50
         adjust_volume(-amount)
 
     # Check for "set to" or specific number
@@ -75,6 +75,14 @@ def parse_command(command):
         print("  - 'set volume to 50'")
         print("  - 'mute' or 'max volume'")
         print("  - 'current volume'")
+
+def increase_volume():
+    """Increase volume by 50%"""
+    adjust_volume(50)
+
+def decrease_volume():
+    """Decrease volume by 50%"""
+    adjust_volume(-50)
 
 if __name__ == "__main__":
     print("AI Volume Control Agent")

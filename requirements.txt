@@ -9,7 +9,6 @@ pillow
 flask
 flask-cors
 pyobjc
-pvporcupine
-sounddevice
-dotenv
+pygame
+openai
 
