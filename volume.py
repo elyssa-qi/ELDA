@@ -89,43 +89,51 @@ def show_volume_notification(volume_level, action="Volume Changed"):
 
 def get_current_volume():
     """Get the current system volume (0-100)"""
-    result = subprocess.run(
-        ["osascript", "-e", "output volume of (get volume settings)"],
-        capture_output=True,
-        text=True
-    )
-    return int(result.stdout.strip())
+    try:
+        result = subprocess.run(
+            ["osascript", "-e", "output volume of (get volume settings)"],
+            capture_output=True,
+            text=True
+        )
+        return int(result.stdout.strip())
+    except:
+        return 50  # fallback
 
 def set_volume(level):
-    """Set the system volume to a specific level (0-100)"""
+    """Set the system volume to a specific level (0-100) - using proper osascript commands"""
     level = max(0, min(100, level))  # Clamp between 0-100
-    subprocess.run(
-        ["osascript", "-e", f"set volume output volume {level}"],
-        check=True
-    )
-    show_native_volume_overlay()
-    show_volume_notification(level, "Volume Set")
-    display_volume_status(level)
+    
+    print(f"Setting volume to {level}%...")
+    
+    # Use proper osascript volume commands (these work!)
+    try:
+        subprocess.run(
+            ["osascript", "-e", f"set volume output volume {level}"],
+            check=True
+        )
+        show_native_volume_overlay()
+        display_volume_status(level)
+    except Exception as e:
+        print(f"Failed to set volume: {e}")
 
 def adjust_volume(change):
-    """Adjust volume by a relative amount (+/- percentage)"""
+    """Adjust volume by a relative amount (+/- percentage) - using proper osascript commands"""
     current = get_current_volume()
     new_volume = current + change
     new_volume = max(0, min(100, new_volume))
-    subprocess.run(
-        ["osascript", "-e", f"set volume output volume {new_volume}"],
-        check=True
-    )
-    print(f"Volume adjusted from {current}% to {new_volume}%")
-    show_native_volume_overlay()
     
-    # Show appropriate notification based on change direction
-    if change > 0:
-        show_volume_notification(new_volume, "Volume Increased")
-    else:
-        show_volume_notification(new_volume, "Volume Decreased")
+    print(f"Volume adjusting from {current}% to {new_volume}%")
     
-    display_volume_status(new_volume)
+    # Use proper osascript volume commands (these work!)
+    try:
+        subprocess.run(
+            ["osascript", "-e", f"set volume output volume {new_volume}"],
+            check=True
+        )
+        show_native_volume_overlay()
+        display_volume_status(new_volume)
+    except Exception as e:
+        print(f"Failed to adjust volume: {e}")
 
 def parse_command(command):
     """Parse text command and adjust volume accordingly"""
@@ -152,13 +160,31 @@ def parse_command(command):
         else:
             print("Please specify a volume level (0-100)")
 
-    # Check for mute
+    # Check for mute - using proper osascript commands
     elif "mute" in command:
-        set_volume(0)
+        print("Setting volume to minimum...")
+        try:
+            subprocess.run(
+                ["osascript", "-e", "set volume output volume 0"],
+                check=True
+            )
+            show_native_volume_overlay()
+            display_volume_status(0)
+        except Exception as e:
+            print(f"Failed to mute: {e}")
 
-    # Check for max/full
+    # Check for max/full - using proper osascript commands
     elif any(word in command for word in ["max", "maximum", "full"]):
-        set_volume(100)
+        print("Setting volume to maximum...")
+        try:
+            subprocess.run(
+                ["osascript", "-e", "set volume output volume 100"],
+                check=True
+            )
+            show_native_volume_overlay()
+            display_volume_status(100)
+        except Exception as e:
+            print(f"Failed to set max volume: {e}")
 
     # Check for current/status
     elif any(word in command for word in ["current", "status", "what", "level"]):
@@ -210,10 +236,20 @@ def test_notification():
         show_volume_notification(level, f"Test {level}%")
         time.sleep(1.5)  # Longer pause between notifications
 
+def test_volume_levels():
+    """Test function to show different volume levels"""
+    print("Testing volume levels...")
+    test_levels = [0, 25, 50, 75, 100]
+    
+    for level in test_levels:
+        print(f"Testing {level}% volume")
+        display_volume_status(level)
+        time.sleep(1)
+
 if __name__ == "__main__":
     print("AI Volume Control Agent")
     print("Commands: increase/decrease/set/mute/max/current")
-    print("Special: 'test overlay' or 'test notification' for demos")
+    print("Special: 'test overlay', 'test notification', or 'test levels' for demos")
     print("Type 'quit' to exit\n")
 
     while True:
@@ -225,5 +261,7 @@ if __name__ == "__main__":
             test_overlay()
         elif command.lower() == "test notification":
             test_notification()
+        elif command.lower() == "test levels":
+            test_volume_levels()
         elif command:
             parse_command(command)
