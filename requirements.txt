@@ -8,3 +8,8 @@ increasevolume
 pillow
 flask
 flask-cors
+pyobjc
+pvporcupine
+sounddevice
+dotenv
+

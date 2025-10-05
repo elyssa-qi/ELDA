@@ -1,2 +1,21 @@
 .env
 venv/
+ Node modules
+elda-app/node_modules/
+**/node_modules/
+
+# macOS system files
+.DS_Store
+
+# Logs
+*.log
+
+# Build outputs
+dist/
+build/
+
+# Temporary editor files
+*.swp
+*.swo
+.idea/
+.vscode/
