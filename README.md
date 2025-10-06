@@ -1,4 +1,4 @@
-# ELDA - AI Voice Assistant
+# ELDA - Elderly Learning Digital Agent
 
 Elda is an intelligent voice assistant specifically designed to help elderly users navigate technology with confidence. Using advanced AI and natural language processing, Elda provides step-by-step visual tutorials triggered by simple voice commands, making technology more accessible for seniors.
 
